@@ -1,2 +1,2 @@
-# AiV_test
-ros2 dynamic nodes
+# ros2_dynamic_nodes
+AiV test
