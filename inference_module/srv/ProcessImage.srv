@@ -1,0 +1,7 @@
+# Request (입력값)
+sensor_msgs/Image image_data
+
+---
+# Response (출력값)
+bool processed
+string message

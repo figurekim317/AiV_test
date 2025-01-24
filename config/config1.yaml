@@ -1,0 +1,7 @@
+nodes:
+  - module: camera_module
+    name: camera_type1
+  - module: image_processing_module
+    name: processor_type2
+  - module: robot_module
+    name: robot_type3

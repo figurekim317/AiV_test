@@ -1,0 +1,11 @@
+# Goal (입력값)
+string motion_type
+
+---
+# Result (최종 결과)
+bool success
+string result_message
+
+---
+# Feedback (중간 진행 상태)
+float32 progress
