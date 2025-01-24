@@ -1,0 +1,10 @@
+version: '3'
+services:
+  ros2_system:
+    build: .
+    container_name: ros2_container
+    network_mode: "host"
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ./ros2_ws:/ros2_ws
