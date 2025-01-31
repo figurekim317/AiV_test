@@ -3,11 +3,11 @@ services:
   ros2_system:
     build: .
     container_name: ros2_container
-    network_mode: "host"
+    network_mode: "host"  # Allows ROS 2 nodes to communicate without additional network setup
     environment:
       - ROS_DOMAIN_ID=0
-      - ROS_CONFIG_FILE=config/config1.yaml  # 실행할 설정 파일 지정 가능
+      - ROS_CONFIG_FILE=config/config1.yaml  # Allows dynamic configuration selection
     volumes:
-      - ./:/ros2_ws  # 프로젝트 전체를 컨테이너에서 접근 가능
-    restart: unless-stopped  # 예기치 않은 종료 시 자동 재시작
-    tty: true  # 터미널에서 로그 유지
+      - ./:/ros2_ws  # Mounts the entire project directory into the container
+    restart: unless-stopped  # Automatically restarts the container if it crashes
+    tty: true  # Keeps the terminal session active for debugging
