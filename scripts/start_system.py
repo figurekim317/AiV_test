@@ -6,7 +6,7 @@ import signal
 CONFIG_FILE = os.getenv("ROS_CONFIG_FILE", "config/config1.yaml")
 
 def load_config():
-    """설정 파일을 로드하여 실행할 노드 목록을 반환"""
+    """Loads the configuration file and returns the list of nodes to launch."""
     try:
         with open(CONFIG_FILE, "r") as file:
             return yaml.safe_load(file)
@@ -15,7 +15,7 @@ def load_config():
         return None
 
 def start_nodes(config):
-    """설정 파일을 기반으로 각 노드를 실행"""
+    """Starts the nodes defined in the configuration file."""
     processes = []
     try:
         for node in config["nodes"]:
@@ -31,7 +31,7 @@ def start_nodes(config):
             processes.append(process)
             print(f"Started {module} node: {node_name}")
 
-        # 모든 노드가 종료될 때까지 대기
+        # Wait for all nodes to complete execution
         for process in processes:
             process.wait()
 
@@ -39,9 +39,9 @@ def start_nodes(config):
         print("\nSystem interrupted. Shutting down nodes...")
     finally:
         for process in processes:
-            process.send_signal(signal.SIGTERM)  # 안전한 종료 신호 전송
+            process.send_signal(signal.SIGTERM)  # Send termination signal
         for process in processes:
-            process.wait()  # 모든 프로세스가 안전하게 종료될 때까지 대기
+            process.wait()  # Wait for processes to exit safely
         print("All nodes stopped successfully.")
 
 if __name__ == "__main__":

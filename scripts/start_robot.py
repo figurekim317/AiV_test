@@ -6,10 +6,10 @@ from robot_module.robot_type1 import RobotType1
 from robot_module.robot_type2 import RobotType2
 from robot_module.robot_type3 import RobotType3
 
-CONFIG_FILE = "config/config1.yaml"
+CONFIG_FILE = os.getenv("ROS_CONFIG_FILE", "config/config1.yaml")
 
 def load_robot_config():
-    """설정 파일에서 로봇 노드의 타입을 동적으로 로드"""
+    """Loads the robot node type from the configuration file."""
     try:
         with open(CONFIG_FILE, "r") as f:
             config = yaml.safe_load(f)
@@ -21,16 +21,17 @@ def load_robot_config():
     return None
 
 def main():
+    """Initializes and runs the selected robot node."""
     rclpy.init()
 
-    # 설정 파일에서 기본 로봇 타입 로드 (명령줄 인수가 없을 경우)
+    # Load the default robot type from config if no argument is provided
     robot_type = sys.argv[1] if len(sys.argv) > 1 else load_robot_config()
 
     if not robot_type:
         print("Error: No robot type provided and no valid configuration found.")
         return
     
-    # 로봇 노드 매핑
+    # Robot node mapping
     robot_nodes = {
         "robot_type1": RobotType1,
         "robot_type2": RobotType2,

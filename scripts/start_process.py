@@ -6,10 +6,10 @@ from image_processing_module.processor_type1 import ProcessorType1
 from image_processing_module.processor_type2 import ProcessorType2
 from image_processing_module.processor_type3 import ProcessorType3
 
-CONFIG_FILE = "config/config1.yaml"
+CONFIG_FILE = os.getenv("ROS_CONFIG_FILE", "config/config1.yaml")
 
 def load_processing_config():
-    """설정 파일에서 이미지 프로세싱 노드의 타입을 동적으로 로드"""
+    """Loads the image processing node type from the configuration file."""
     try:
         with open(CONFIG_FILE, "r") as f:
             config = yaml.safe_load(f)
@@ -21,16 +21,17 @@ def load_processing_config():
     return None
 
 def main():
+    """Initializes and runs the selected image processing node."""
     rclpy.init()
 
-    # 설정 파일에서 기본 이미지 프로세싱 타입 로드 (명령줄 인수가 없을 경우)
+    # Load the default processor type from config if no argument is provided
     processor_type = sys.argv[1] if len(sys.argv) > 1 else load_processing_config()
 
     if not processor_type:
         print("Error: No processing type provided and no valid configuration found.")
         return
     
-    # 프로세싱 노드 매핑
+    # Processing node mapping
     processing_nodes = {
         "processor_type1": ProcessorType1,
         "processor_type2": ProcessorType2,

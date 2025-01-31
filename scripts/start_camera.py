@@ -6,10 +6,10 @@ from camera_module.camera_type1 import CameraType1
 from camera_module.camera_type2 import CameraType2
 from camera_module.camera_type3 import CameraType3
 
-CONFIG_FILE = "config/config1.yaml"
+CONFIG_FILE = os.getenv("ROS_CONFIG_FILE", "config/config1.yaml")
 
 def load_camera_config():
-    """설정 파일에서 카메라 노드의 타입을 동적으로 로드"""
+    """Loads the camera node type from the configuration file."""
     try:
         with open(CONFIG_FILE, "r") as f:
             config = yaml.safe_load(f)
@@ -21,16 +21,17 @@ def load_camera_config():
     return None
 
 def main():
+    """Initializes and runs the selected camera node."""
     rclpy.init()
 
-    # 설정 파일에서 기본 카메라 타입 로드 (명령줄 인수가 없을 경우)
+    # Load the default camera type from config if no argument is provided
     camera_type = sys.argv[1] if len(sys.argv) > 1 else load_camera_config()
 
     if not camera_type:
         print("Error: No camera type provided and no valid configuration found.")
         return
     
-    # 카메라 노드 매핑
+    # Camera node mapping
     camera_nodes = {
         "camera_type1": CameraType1,
         "camera_type2": CameraType2,
