@@ -13,10 +13,10 @@ This document describes the design and architecture for a flexible ROS 2 node co
 The architecture follows a modular and scalable approach where different nodes within each module communicate using **topics, services, and actions**.
 
 ### **Node Communication**
-- **Camera Module → Image Processing Module**: Uses **ROS 2 topics** to publish image data.
-- **Image Processing Module → Robot Module**: Uses **ROS 2 services** to process images and return results.
-- **Robot Module → Main Module**: Uses **ROS 2 actions** to handle asynchronous motion execution and feedback.
-- **Main Module → Camera Module**: Requests new captures based on motion completion using **services**.
+- **Camera Module → Image Processing Module**: Uses **ROS 2 topics (`/camera/image_raw`)** to publish image data.
+- **Image Processing Module → Robot Module**: Uses **ROS 2 services (`/image_processing/process_image`)** to process images and return results.
+- **Robot Module → Main Module**: Uses **ROS 2 actions (`/robot/execute_motion`)** to handle asynchronous motion execution and feedback.
+- **Main Module → Camera Module**: Requests new captures based on motion completion using **ROS 2 services (`/camera/capture_request`)**.
 
 ### **Dynamic Node Loading**
 The main module reads a `config.yaml` file to determine which nodes should be instantiated at runtime. This allows easy reconfiguration without modifying the source code.
@@ -37,6 +37,7 @@ nodes:
 The ROS 2 system runs inside Docker containers for easy deployment. The project includes:
 - `Dockerfile` to set up the ROS 2 environment.
 - `docker-compose.yml` to manage multiple containers.
+- `entrypoint.sh` to dynamically configure and launch ROS 2 nodes.
 
 ### **Running as a Script (Without Docker)**
 If you want to run the system without Docker, follow these steps:
@@ -53,7 +54,7 @@ pip install -r requirements.txt
 
 #### **3. Run the main node:**
 ```sh
-python scripts/start_system.py --config config/config1.yaml
+python scripts/start_system.py
 ```
 
 #### **4. Run other nodes in separate terminals:**
@@ -69,6 +70,7 @@ python scripts/start_robot.py &
 ros2_dynamic_nodes/
 ├── Dockerfile
 ├── docker-compose.yml
+├── entrypoint.sh
 ├── README.md
 ├── config/
 │   ├── config1.yaml
@@ -107,34 +109,25 @@ ros2_dynamic_nodes/
 │   │   ├── ExecuteMotion.action
 ```
 
-### **Example: `scripts/start_system.py` (Main Entry Script)**
-```python
-import subprocess
-import yaml
-
-def load_config(config_path):
-    with open(config_path, 'r') as f:
-        return yaml.safe_load(f)
-
-def start_nodes(config):
-    for node in config['nodes']:
-        module, name = node['module'], node['name']
-        subprocess.Popen(['python', f'scripts/start_{module}.py', name])
-
-if __name__ == "__main__":
-    config = load_config('config/config1.yaml')
-    start_nodes(config)
+### **Running with Docker**
+```sh
+docker-compose up --build
 ```
+You can modify the configuration file before running the system to change the behavior dynamically.
 
 ### **Modify Configuration**
 - Modify the configuration file (`config/config1.yaml`) to change nodes dynamically.
+- Use the environment variable `ROS_CONFIG_FILE` to specify a different configuration file:
+```sh
+ROS_CONFIG_FILE=config/config2.yaml docker-compose up --build
+```
 
 ### **Testing**
 - Change the `config.yaml` file to test different node configurations.
 - Use `ros2 topic echo /camera/image_raw` to verify published messages.
 
 ### **✅ Final Summary**
-- `Dockerfile`, `docker-compose.yml`: **Container environment setup**
+- `Dockerfile`, `docker-compose.yml`, `entrypoint.sh`: **Container environment setup**
 - `config.yaml`: **Dynamic configuration**
 - `main_node.py`: **Runs nodes based on the configuration file**
 - `scripts/`: **Script-based execution support**

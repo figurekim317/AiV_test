@@ -1,7 +1,23 @@
 nodes:
   - module: camera_module
     name: camera_type1
+    id: "cam_001"
+    topics:
+      publish: "/camera/image_raw"
+      subscribe: "/camera/request"
   - module: image_processing_module
-    name: processor_type2
+    name: processor_type1
+    id: "proc_001"
+    topics:
+      subscribe: "/camera/image_raw"
+      publish: "/image_processing/result"
+    services:
+      process: "/image_processing/process_image"
   - module: robot_module
-    name: robot_type3
+    name: robot_type1
+    id: "robot_001"
+    topics:
+      subscribe: "/image_processing/result"
+      publish: "/robot/status"
+    actions:
+      execute_motion: "/robot/execute_motion"

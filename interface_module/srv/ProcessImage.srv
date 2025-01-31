@@ -1,0 +1,8 @@
+# Request
+sensor_msgs/Image image_data
+string camera_id
+
+---
+# Response
+bool processed
+ProcessingResult result

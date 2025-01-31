@@ -1,19 +1,23 @@
-import os
-from launch import LaunchDescription
-from launch_ros.actions import Node
-import yaml
-
-def load_config():
-    with open(os.path.join(os.getcwd(), 'config', 'config1.yaml'), 'r') as f:
-        return yaml.safe_load(f)
-
-def generate_launch_description():
-    config = load_config()
-    nodes = [
-        Node(
-            package=node["module"],
-            executable=node["name"],
-            name=node["name"]
-        ) for node in config["nodes"]
-    ]
-    return LaunchDescription(nodes)
+nodes:
+  - module: camera_module
+    name: camera_type2
+    id: "cam_002"
+    topics:
+      publish: "/camera2/image_raw"
+      subscribe: "/camera2/request"
+  - module: image_processing_module
+    name: processor_type2
+    id: "proc_002"
+    topics:
+      subscribe: "/camera2/image_raw"
+      publish: "/image_processing/result2"
+    services:
+      process: "/image_processing/process_image2"
+  - module: robot_module
+    name: robot_type2
+    id: "robot_002"
+    topics:
+      subscribe: "/image_processing/result2"
+      publish: "/robot/status2"
+    actions:
+      execute_motion: "/robot/execute_motion2"
