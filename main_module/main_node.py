@@ -7,62 +7,70 @@ from interface_module.action import ExecuteMotion
 from rclpy.action import ActionClient
 
 class MainNode(Node):
+    """MainNode: Orchestrates communication between camera, image processing, and robot modules."""
+
     def __init__(self):
         super().__init__('main_node')
 
-        # Publisher & Subscriber 설정
+        # Publisher to request image capture from the camera module
         self.camera_request_pub = self.create_publisher(String, 'camera/request', 10)
-        self.robot_status_sub = self.create_subscription(String, 'robot/status', self.robot_status_callback, 10)
-        self.image_sub = self.create_subscription(Image, 'camera/image_raw', self.image_callback, 10)
 
-        # Service 및 Action 클라이언트 설정
+        # Subscribers to listen for robot status updates and camera images
+        self.robot_status_sub = self.create_subscription(
+            String, 'robot/status', self.robot_status_callback, 10)
+        self.image_sub = self.create_subscription(
+            Image, 'camera/image_raw', self.image_callback, 10)
+
+        # Service client for image processing
         self.process_image_client = self.create_client(ProcessImage, 'image_processing/process_image')
+
+        # Action client for sending motion execution requests to the robot
         self.robot_motion_client = ActionClient(self, ExecuteMotion, 'robot/execute_motion')
 
-        self.get_logger().info("Main Node Initialized.")
+        self.get_logger().info("Main Node Initialized and ready for operations.")
 
     def robot_status_callback(self, msg):
-        """로봇이 작업을 완료하면 새로운 이미지 캡처 요청"""
+        """Handles robot status updates. If motion is completed, requests new image capture."""
         if msg.data == "motion_completed":
             self.get_logger().info("Robot completed motion. Requesting new capture.")
             self.request_capture()
 
     def request_capture(self):
-        """카메라 노드에 이미지 캡처 요청을 보냄"""
+        """Sends a capture request to the camera node."""
         msg = String()
         msg.data = "capture"
         self.camera_request_pub.publish(msg)
-        self.get_logger().info("Requested image capture.")
+        self.get_logger().info("Image capture requested.")
 
     def image_callback(self, msg):
-        """카메라에서 이미지를 수신하면 이미지 프로세싱 요청"""
+        """Handles received images and requests image processing."""
         self.get_logger().info("Received image from camera. Sending for processing.")
-        
-        # 서비스 요청이 가능할 때까지 대기
+
+        # Ensure the image processing service is available before requesting
         if not self.process_image_client.wait_for_service(timeout_sec=3.0):
             self.get_logger().error("Image processing service unavailable.")
             return
 
         request = ProcessImage.Request()
-        request.image_data = msg
+        request.image_data = msg  # Pass the received image to the service request
 
         future = self.process_image_client.call_async(request)
         future.add_done_callback(self.process_image_response)
 
     def process_image_response(self, future):
-        """이미지 프로세싱 결과를 받고 로봇에 작업 요청"""
+        """Handles image processing service response and initiates robot motion if successful."""
         try:
             response = future.result()
             if response.processed:
-                self.get_logger().info(f"Image processed successfully: {response}")
+                self.get_logger().info(f"Image processed successfully: {response.message}")
                 self.execute_robot_motion("processed_motion")
             else:
-                self.get_logger().warn("Image processing failed.")
+                self.get_logger().warn(f"Image processing failed: {response.message}")
         except Exception as e:
-            self.get_logger().error(f"Failed to process image: {str(e)}")
+            self.get_logger().error(f"Error while processing image: {str(e)}")
 
     def execute_robot_motion(self, motion_type):
-        """로봇에게 특정 모션 실행 요청"""
+        """Sends a motion execution request to the robot via an action client."""
         if not self.robot_motion_client.wait_for_server(timeout_sec=3.0):
             self.get_logger().error("Robot motion action server unavailable.")
             return
@@ -71,13 +79,26 @@ class MainNode(Node):
         goal_msg.motion_type = motion_type
 
         self.get_logger().info(f"Sending robot motion request: {motion_type}")
-        self.robot_motion_client.send_goal_async(goal_msg, feedback_callback=self.motion_feedback_callback)
+        future = self.robot_motion_client.send_goal_async(goal_msg, feedback_callback=self.motion_feedback_callback)
+        future.add_done_callback(self.motion_result_callback)
 
     def motion_feedback_callback(self, feedback_msg):
-        """로봇 모션 실행 중 피드백을 수신하여 로그 출력"""
-        self.get_logger().info(f"Robot motion progress: {feedback_msg.feedback.progress}%")
+        """Handles feedback from the robot motion execution."""
+        self.get_logger().info(f"Robot motion progress: {feedback_msg.feedback.progress:.2f}%")
+
+    def motion_result_callback(self, future):
+        """Handles the final result of the robot motion execution."""
+        try:
+            result = future.result().result
+            if result.success:
+                self.get_logger().info(f"Robot motion completed successfully: {result.result_message}")
+            else:
+                self.get_logger().warn(f"Robot motion failed: {result.result_message}")
+        except Exception as e:
+            self.get_logger().error(f"Error in robot motion execution: {str(e)}")
 
 def main(args=None):
+    """Main function to initialize and run the ROS 2 node."""
     rclpy.init(args=args)
     node = MainNode()
     rclpy.spin(node)
