@@ -7,56 +7,59 @@ from rclpy.action import ActionServer
 import time
 
 class RobotType2(Node):
+    """RobotType2 Node: Executes motion commands with real-time sensor feedback."""
+
     def __init__(self):
         super().__init__('robot_type2')
 
-        # Action 서버 설정 (MainNode로부터 동작 명령 수신)
+        # Action server to receive motion execution requests
         self.action_server = ActionServer(self, ExecuteMotion, 'robot/execute_motion2', self.execute_motion_callback)
 
-        # 상태 퍼블리셔 설정 (로봇 상태 전송)
+        # Publisher to send robot status updates
         self.status_publisher = self.create_publisher(String, 'robot/status2', 10)
 
-        # 센서 데이터 구독 (로봇이 환경을 인식하고 반응)
+        # Subscriber to receive sensor data for adaptive motion execution
         self.sensor_subscriber = self.create_subscription(Image, 'sensor/data', self.sensor_callback, 10)
 
         self.get_logger().info("Robot Type 2 initialized with sensor feedback.")
 
     def execute_motion_callback(self, goal_handle):
-        """로봇이 받은 모션 실행 요청을 처리하는 콜백 함수"""
+        """Processes motion execution requests, adjusting behavior based on sensor feedback."""
         motion_type = goal_handle.request.motion_type
         self.get_logger().info(f"Executing motion: {motion_type} with sensor feedback.")
 
-        # 동작 진행률 피드백
+        # Send feedback on motion progress
         feedback_msg = ExecuteMotion.Feedback()
         for progress in range(0, 101, 25):
             feedback_msg.progress = progress
             goal_handle.publish_feedback(feedback_msg)
             self.get_logger().info(f"Motion Progress: {progress}%")
-            time.sleep(1)  # 동작 진행을 시뮬레이션
+            time.sleep(1)  # Simulating motion execution
 
-        # 실행 완료 후 결과 전송
+        # Mark the motion as complete and send result
         goal_handle.succeed()
         result = ExecuteMotion.Result()
         result.success = True
         result.result_message = f"Motion '{motion_type}' completed successfully with sensor adaptation."
 
-        # 상태 업데이트
+        # Publish updated robot status
         self.publish_status("motion_completed")
 
         return result
 
     def sensor_callback(self, msg):
-        """센서 데이터를 수신하고 처리"""
+        """Processes sensor data to adjust robot motion dynamically."""
         self.get_logger().info("Received sensor data. Adjusting motion parameters.")
 
     def publish_status(self, status_message):
-        """로봇 상태를 퍼블리시"""
+        """Publishes the current robot status to the MainNode."""
         msg = String()
         msg.data = status_message
         self.status_publisher.publish(msg)
         self.get_logger().info(f"Published Robot Status: {status_message}")
 
 def main(args=None):
+    """Main function to initialize and run the ROS 2 node."""
     rclpy.init(args=args)
     node = RobotType2()
     rclpy.spin(node)
