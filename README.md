@@ -65,7 +65,21 @@ python scripts/start_robot.py &
 ```
 (Use `&` to run them in the background.)
 
-### **File Structure for Script Execution**
+### **Running with Docker**
+#### **1. Build and run the container:**
+```sh
+docker-compose up --build
+```
+#### **2. Run with a specific configuration file:**
+```sh
+ROS_CONFIG_FILE=config/config2.yaml docker-compose up --build
+```
+
+### **Modify Configuration**
+- Modify the configuration file (`config/config1.yaml`) to change nodes dynamically.
+- Use the environment variable `ROS_CONFIG_FILE` to specify a different configuration file before starting the system.
+
+### **File Structure for Execution**
 ```sh
 ros2_dynamic_nodes/
 ├── Dockerfile
@@ -108,23 +122,6 @@ ros2_dynamic_nodes/
 │   ├── action/
 │   │   ├── ExecuteMotion.action
 ```
-
-### **Running with Docker**
-```sh
-docker-compose up --build
-```
-You can modify the configuration file before running the system to change the behavior dynamically.
-
-### **Modify Configuration**
-- Modify the configuration file (`config/config1.yaml`) to change nodes dynamically.
-- Use the environment variable `ROS_CONFIG_FILE` to specify a different configuration file:
-```sh
-ROS_CONFIG_FILE=config/config2.yaml docker-compose up --build
-```
-
-### **Testing**
-- Change the `config.yaml` file to test different node configurations.
-- Use `ros2 topic echo /camera/image_raw` to verify published messages.
 
 ### **✅ Final Summary**
 - `Dockerfile`, `docker-compose.yml`, `entrypoint.sh`: **Container environment setup**
