@@ -75,6 +75,22 @@ docker-compose up --build
 ROS_CONFIG_FILE=config/config2.yaml docker-compose up --build
 ```
 
+### **Testing the System**
+After launching the system, you can verify the communication between nodes using the following commands:
+
+#### **1. Verify that the camera is publishing images:**
+```sh
+ros2 topic echo /camera/image_raw
+```
+#### **2. Verify that the image processing node is responding to service calls:**
+```sh
+ros2 service call /image_processing/process_image interface_module/srv/ProcessImage "{image_data: {data: []}}"
+```
+#### **3. Monitor robot motion execution feedback:**
+```sh
+ros2 action send_goal /robot/execute_motion interface_module/action/ExecuteMotion "{motion_type: 'walk'}"
+```
+
 ### **Modify Configuration**
 - Modify the configuration file (`config/config1.yaml`) to change nodes dynamically.
 - Use the environment variable `ROS_CONFIG_FILE` to specify a different configuration file before starting the system.
@@ -130,7 +146,8 @@ ros2_dynamic_nodes/
 - `scripts/`: **Script-based execution support**
 - `camera_node.py`, `processor_type1.py`, `robot_type1.py`: **ROS 2 Nodes**
 - `README.md`: **Documentation**
-- **Added script execution support**: The system can now run independently without Docker.
+- **Expanded testing instructions**: Now includes `ros2 topic echo`, `ros2 service call`, and `ros2 action send_goal`.
+- **Added dynamic configuration handling**: Users can change configurations using `ROS_CONFIG_FILE`.
 
 This submission ensures **dynamic node execution and ROS 2 communication** for a fully functional system, whether inside a container or as standalone scripts. 🚀
 

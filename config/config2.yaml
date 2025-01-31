@@ -3,21 +3,31 @@ nodes:
     name: camera_type2
     id: "cam_002"
     topics:
-      publish: "/camera2/image_raw"
-      subscribe: "/camera2/request"
+      publish: "/camera/image_raw_2"
+      subscribe: "/camera/request_2"
+    parameters:
+      resolution: "1280x720"
+      fps: 60
+
   - module: image_processing_module
     name: processor_type2
     id: "proc_002"
     topics:
-      subscribe: "/camera2/image_raw"
-      publish: "/image_processing/result2"
+      subscribe: "/camera/image_raw_2"
+      publish: "/image_processing/result_2"
     services:
-      process: "/image_processing/process_image2"
+      process: "/image_processing/process_image_2"
+    parameters:
+      method: "object_recognition"
+
   - module: robot_module
     name: robot_type2
     id: "robot_002"
     topics:
-      subscribe: "/image_processing/result2"
-      publish: "/robot/status2"
+      subscribe: "/image_processing/result_2"
+      publish: "/robot/status_2"
     actions:
-      execute_motion: "/robot/execute_motion2"
+      execute_motion: "/robot/execute_motion_2"
+    parameters:
+      speed: "fast"
+      safety_mode: false

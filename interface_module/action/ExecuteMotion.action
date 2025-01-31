@@ -1,11 +1,15 @@
-# Goal
+# Goal (Input values)
+# The type of motion the robot should perform.
 string motion_type
 
 ---
-# Result
+# Result (Final output)
+# Indicates whether the motion execution was successful.
 bool success
+# A message providing details about the execution result.
 string result_message
 
 ---
-# Feedback
+# Feedback (Ongoing status updates)
+# Progress percentage of the motion execution (0.0 - 100.0).
 float32 progress

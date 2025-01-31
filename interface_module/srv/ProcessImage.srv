@@ -1,8 +1,10 @@
-# Request
+# Request (Input values)
+# Image data received from the camera module for processing.
 sensor_msgs/Image image_data
-string camera_id
 
 ---
-# Response
+# Response (Output values)
+# Indicates whether the image was successfully processed.
 bool processed
-ProcessingResult result
+# A message providing additional details about the processing result.
+string message
