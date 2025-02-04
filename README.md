@@ -1,5 +1,75 @@
 # ROS 2 Dynamic Node Communication System
 
+## **Problem: Developing a Flexible ROS 2 Node Communication System with Dynamic Node Configuration**
+
+## **Background**
+This project aims to develop a communication system using ROS 2 that enables interaction between camera, image processing, robot, and main modules. These modules will communicate through **topics, services, and actions**. Additionally, a custom ROS 2 interface package will be created, including messages, services, and actions.
+
+### **Dynamic Node Loading in the Main Node**
+- The `main_node` dynamically loads nodes by reading a `config.yaml` file at runtime.
+- The system must remain operational even when module nodes are replaced.
+
+#### **Example Configuration Files**
+```yaml
+# Example 1
+nodes:
+  - module: camera_module
+    name: camera_type2
+  - module: image_processing_module
+    name: sensor_type1
+  - module: robot_module
+    name: robot_type2
+
+# Example 2
+nodes:
+  - module: camera_module
+    name: camera_type1
+  - module: image_processing_module
+    name: sensor_type2
+  - module: robot_module
+    name: robot_type3
+```
+
+## **Testing and Verification**
+- Modify and test multiple configuration files to ensure the system operates as expected.
+
+## **Additional Requirements**
+This project does not require direct implementation; instead, it focuses on documenting the architecture and methodology via a markdown file in the GitHub repository.
+
+- The proposed solution should support:
+  - Multiple cameras, where each captured image undergoes different image processing.
+  - Dynamic adjustment of robot motion scenarios based on sensor feedback.
+  - Workflow modifications based on conditional logic.
+
+#### **Example Use Cases**
+1. **Multiple Camera Support**
+    - Dynamic loading of camera configurations.
+    - Routing of images to appropriate processing nodes.
+    - Synchronization of data collected from multiple cameras.
+2. **Adaptive Robot Motion**
+    - Configurable motion sequences.
+    - Real-time adjustments based on sensor feedback.
+    - Dynamic selection of subsequent tasks after motion completion.
+3. **Conditional Execution Flow**
+    - Multi-stage trigger workflows.
+    - Modifying execution order based on conditions.
+
+## **Submission Requirements**
+- Add **GitAivSW (sw@aiv.ai)** as a **contributor** to the **private GitHub repository**.
+- The repository should include:
+  - Source code files implementing the required features.
+  - At least two example configuration files.
+  - A detailed `README.md` explaining execution steps and test scenarios.
+
+## **Grading Criteria**
+- **Functionality**: Correct implementation of required features.
+- **Readability & Maintainability**: Clean and structured code.
+- **Extensibility**: Modular design for future enhancements.
+- **Error Handling**: Robust mechanisms to handle edge cases.
+- **Documentation & Testing**: Well-documented setup and verification steps.
+
+---
+
 ## Overview
 This document describes the design and architecture for a flexible ROS 2 node communication system that dynamically configures nodes based on a YAML configuration file. The system is implemented in a Docker environment and can also be run as standalone scripts. The system consists of five core modules:
 
